@@ -1,0 +1,1 @@
+Remove .env.local from Git tracking and add to .gitignore
