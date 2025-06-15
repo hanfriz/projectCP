@@ -1,54 +1,83 @@
 import { createClient } from 'contentful';
 
-const client = createClient({
-  space: process.env.CONTENTFUL_SPACE_ID!,
-  accessToken: process.env.CONTENTFUL_ACCESS_TOKEN!,
+ const client = createClient({
+  space: process.env.CONTENTFUL_SPACE_ID ||'',
+  accessToken: process.env.CONTENTFUL_ACCESS_TOKEN || '', 
 });
 
-export default client;
-
-export async function getAllPosts() {
-  const entries = await client.getEntries({
-    content_type: 'blogPost',
-    order: ['-sys.createdAt'],
-    include: 2,
-  });
-  return entries.items;
-}
-
+// Fungsi: Ambil semua kategori
 export async function getAllCategories() {
-  const entries = await client.getEntries({
-    content_type: 'category',
-    order: ['fields.name'],
-  });
-  return entries.items;
+  try {
+    const response = await client.getEntries({
+      content_type: 'category',
+      order: ['fields.name'],
+    });
+    return response.items;
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    return [];
+  }
 }
 
-export async function getAllAuthors() {
-  const entries = await client.getEntries({
-    content_type: 'author',
-    order: ['fields.name'],
-  });
-  return entries.items;
+// Fungsi: Ambil semua post berdasarkan kategori
+export async function getAllPostsByCategory(slug: string) {
+  try {
+    const response = await client.getEntries({
+      content_type: 'blogPost',
+      'fields.category.fields.slug': slug,
+      include: 2,
+    });
+    return response.items;
+  } catch (error) {
+    console.error('Error fetching posts by category:', error);
+    return [];
+  }
 }
 
-export async function getAllPostsByCategory(categorySlug: string) {
-  const entries = await client.getEntries({
-    content_type: 'blogPost',
-    'fields.category.fields.slug': categorySlug,
-    include: 2,
-    order: ['-sys.createdAt'],
-  });
-  return entries.items;
+// Fungsi: Ambil semua post
+export async function getAllPosts() {
+  try {
+    const response = await client.getEntries({
+      content_type: 'blogPost',
+      order: ['-sys.createdAt'],
+    });
+    return response.items;
+  } catch (error) {
+    console.error('Error fetching all posts:', error);
+    return [];
+  }
 }
 
+// Fungsi: Ambil 1 post berdasarkan slug
 export async function getPostBySlug(slug: string) {
-  const entries = await client.getEntries({
-    content_type: 'blogPost',
-    'fields.slug': slug,
-    include: 2,
-    limit: 1,
-  });
-
-  return entries.items[0];
+  try {
+    const response = await client.getEntries({
+      content_type: 'blogPost',
+      'fields.slug': slug,
+      include: 2,
+    });
+    return response.items[0];
+  } catch (error) {
+    console.error('Error fetching post by slug:', error);
+    return null;
+  }
 }
+
+// Fungsi: Ambil semua penulis
+export async function getAllAuthors() {
+  try {
+    const response = await client.getEntries<any>({
+      content_type: 'author',
+      select: ['fields.name,fields.slug'],
+      order: ['fields.name']
+    });
+
+    return response.items;
+  } catch (error) {
+    console.error('Error fetching authors:', error);
+    return [];
+  }
+}
+
+
+
