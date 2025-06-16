@@ -1,21 +1,24 @@
-// src/app/blog/[categorySlug]/page.tsx
 
-import { getAllPostsByCategory } from '../../../lib/contentful';
+import { getAllPostsByCategory } from '../../../../lib/contentful';
+import BlogClient from '../../../../components/BlogClient';
 import { notFound } from 'next/navigation';
-import { Metadata } from 'next';
+import { Metadata, ResolvingMetadata } from 'next';
 
 type Props = {
-  params: {
-    categorySlug: string;
-  };
+  params: { categorySlug: string }
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+// coba pakai generate metadata =P
+export async function generateMetadata(
+  { params }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
   return {
     title: `Posts in category: ${params.categorySlug}`,
   };
 }
 
+// Render page
 export default async function CategoryPage({ params }: Props) {
   const posts = await getAllPostsByCategory(params.categorySlug);
 
@@ -23,17 +26,15 @@ export default async function CategoryPage({ params }: Props) {
     notFound();
   }
 
-  return (
-    <main className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Category: {params.categorySlug}</h1>
-      <ul className="space-y-4">
-        {posts.map((post: any) => (
-          <li key={post.sys.id} className="border p-4 rounded shadow">
-            <h2 className="text-xl font-semibold">{post.fields.title}</h2>
-            <p className="text-sm text-gray-600">{post.fields.excerpt}</p>
-          </li>
-        ))}
-      </ul>
-    </main>
-  );
+  return <BlogClient initialPosts={posts} />;
+}
+
+// static parameters
+export async function generateStaticParams() {
+  const res = await fetch('https://your-api-or-static-category-source'); // ganti dengan getAllCategories()
+  const categories = await res.json(); // jika pakai fetch, atau langsung panggil getAllCategories()
+
+  return categories.map((cat: any) => ({
+    categorySlug: cat.fields.slug,
+  }));
 }
