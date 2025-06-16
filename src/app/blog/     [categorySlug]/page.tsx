@@ -1,6 +1,6 @@
 
-import { getAllPostsByCategory } from '../../../../lib/contentful';
-import BlogClient from '../../../../components/BlogClient';
+import { getAllPostsByCategory } from '../../../lib/contentful';
+import BlogClient from '../../../components/BlogClient';
 import { notFound } from 'next/navigation';
 import { Metadata, ResolvingMetadata } from 'next';
 
