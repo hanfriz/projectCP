@@ -1,25 +1,29 @@
+// src/app/blog/[categorySlug]/page.tsx
 
-import { getAllPostsByCategory } from '../../../lib/contentful';
-import BlogClient from '../../../components/BlogClient';
+import { getAllPostsByCategory } from '../../../../lib/contentful';
+import BlogClient from '../../../../components/BlogClient';
 import { notFound } from 'next/navigation';
 import { Metadata, ResolvingMetadata } from 'next';
 
-type Props = {
-  params: { categorySlug: string }
+// Definisikan tipe untuk params
+type CategoryPageProps = {
+  params: { categorySlug: string };
 };
 
-// coba pakai generate metadata =P
+// Fungsi generateMetadata
 export async function generateMetadata(
-  { params }: Props,
+  { params }: CategoryPageProps, // Gunakan CategoryPageProps di sini
   parent: ResolvingMetadata
 ): Promise<Metadata> {
+  const categorySlug = params.categorySlug;
+
   return {
-    title: `Posts in category: ${params.categorySlug}`,
+    title: `Posts in category: ${categorySlug}`,
   };
 }
 
-// Render page
-export default async function CategoryPage({ params }: Props) {
+// Komponen halaman
+export default async function CategoryPage({ params }: CategoryPageProps) { // Gunakan CategoryPageProps di sini
   const posts = await getAllPostsByCategory(params.categorySlug);
 
   if (!posts || posts.length === 0) {
@@ -29,12 +33,13 @@ export default async function CategoryPage({ params }: Props) {
   return <BlogClient initialPosts={posts} />;
 }
 
-// static parameters
+// Fungsi generateStaticParams
 export async function generateStaticParams() {
-  const res = await fetch('https://your-api-or-static-category-source'); // ganti dengan getAllCategories()
-  const categories = await res.json(); // jika pakai fetch, atau langsung panggil getAllCategories()
+ 
+  const categories = [{ fields: { categorySlug: 'nextjs' } }, { fields: { categorySlug: 'react' } }];
+
 
   return categories.map((cat: any) => ({
-    categorySlug: cat.fields.slug,
+    categorySlug: cat.fields.categorySlug,
   }));
 }
